@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CorginiteCrisis</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Monofett&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="game-wrapper">
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="corgi-container">
+        <img id="corgi-jump-overlay" src="assets/corgiJump.PNG" />
+        <img id="corgi-walk-overlay" src="assets/corgiWalk.PNG" class="apng-sprite" />
+        <img id="corgi-stand-overlay" src="assets/corgiStand.PNG" class="apng-sprite" />
+        <img id="corgi-dive-overlay" src="assets/corgiDive.PNG" class="apng-sprite" />
+    </div>
+
+    <!-- Hidden DOM img holders so the browser animates each APNG; canvas drawImage reads the live frame -->
+    <div id="anim-cache" style="position:absolute;width:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none;">
+        <img id="anim-b1a" src="assets/Building1a.png">
+        <img id="anim-b1b" src="assets/Building1b.png">
+        <img id="anim-b1c" src="assets/Building1c.png">
+    </div>
+
+    <div id="apng-container"></div>
+
+    <div id="start-menu" class="menu-overlay">
+        <div class="menu-title">CorginiteCrisis</div>
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; max-width: 900px;">
+            <button class="ui-box menu-btn" id="start-btn">PLAY</button>
+            <button class="ui-box menu-btn" id="level-select-btn">LEVELS</button>
+            <button class="ui-box menu-btn" id="tut-start-btn">TUTORIAL</button>
+            <button class="ui-box menu-btn" id="dev-start-btn">DEV MODE</button>
+            <button class="ui-box menu-btn" id="controls-start-btn">CONTROLS</button>
+            <button class="ui-box menu-btn" id="score-btn">HIGHSCORE</button>
+            <button class="ui-box menu-btn" id="login-btn" style="background: #E4A082; border-color: #BA5851; color: #BA5851;">CONNECT GOOGLE</button>
+        </div>
+    </div>
+
+    <div id="level-menu" class="menu-overlay" style="display: none;">
+        <div class="menu-title" style="font-size: 60px; margin-bottom: 20px;">LEVEL SELECT</div>
+        <div class="dev-btn-grid" id="level-grid"></div>
+        <button class="ui-box menu-btn" id="level-back-btn" style="margin-top: 30px;">BACK</button>
+    </div>
+
+    <div id="score-menu" class="menu-overlay" style="display: none;">
+        <div class="menu-title" id="score-title">HIGH SCORE: 0</div>
+        <button class="ui-box menu-btn" id="back-btn">BACK</button>
+    </div>
+
+    <div id="pause-menu" class="menu-overlay" style="display: none;">
+        <div class="menu-title">PAUSED</div>
+        <button class="ui-box menu-btn" id="resume-btn">RESUME</button>
+        <button class="ui-box menu-btn" id="objective-btn">OBJECTIVE</button>
+        <button class="ui-box menu-btn" id="controls-pause-btn">CONTROLS</button>
+        <button class="ui-box menu-btn" id="quit-btn">MAIN MENU</button>
+    </div>
+
+    <div id="controls-menu" class="menu-overlay" style="display: none;">
+        <div class="menu-title">CONTROLS</div>
+        <div class="ui-box" style="font-size: 32px; padding: 25px; margin-bottom: 25px; line-height: 1.6;">
+            W / UP / SPACE / RIGHT-TAP - Jump<br>
+            A / S / D / ARROWS / LEFT-DRAG - Move / Drop<br>
+            SHIFT / RIGHT-SWIPE-UP - Dash<br>
+            ESC - Pause / Back
+        </div>
+        <button class="ui-box menu-btn" id="controls-back-btn">BACK</button>
+    </div>
+
+    <div id="objective-menu" class="menu-overlay" style="display: none;">
+        <div class="menu-title">OBJECTIVE</div>
+        <div class="ui-box" id="objective-text" style="font-size: 32px; padding: 25px; margin-bottom: 25px;">
+            COLLECT 10 PIECES OF MAIL
+        </div>
+        <button class="ui-box menu-btn" id="objective-back-btn">BACK</button>
+    </div>
+
+    <div id="dev-menu" class="menu-overlay" style="display: none;">
+        <div class="menu-title" style="font-size: 60px; margin-bottom: 20px;">DEV MODE</div>
+        <div class="dev-btn-grid">
+            <button class="ui-box menu-btn dev-enemy-btn" data-enemy="drone1a">drone1a</button>
+            <button class="ui-box menu-btn dev-enemy-btn" data-enemy="drone1b">drone1b</button>
+            <button class="ui-box menu-btn dev-enemy-btn" data-enemy="drone1c">drone1c</button>
+            <button class="ui-box menu-btn dev-enemy-btn" data-enemy="drone1d">drone1d</button>
+            <button class="ui-box menu-btn dev-enemy-btn" data-enemy="drone1e">drone1e</button>
+            <button class="ui-box menu-btn dev-enemy-btn" data-enemy="drone3">drone3</button>
+            <button class="ui-box menu-btn dev-enemy-btn" data-enemy="drone4">drone4</button>
+            <button class="ui-box menu-btn dev-enemy-btn" data-enemy="bike1">bike1</button>
+            <button class="ui-box menu-btn dev-enemy-btn" data-enemy="mailman1">mailman1</button>
+            <button class="ui-box menu-btn dev-enemy-btn" data-enemy="mailman2">mailman2</button>
+        </div>
+        <button class="ui-box menu-btn" id="test-cutscene-btn" style="background: #598B7C; border-color: #679481; color: #F7E3A9;">TEST CUTSCENE</button>
+        <button class="ui-box menu-btn" id="dev-back-btn">BACK</button>
+    </div>
+
+    <div id="tutorial-menu" class="menu-overlay" style="display: none;">
+        <div class="menu-title" style="font-size: 60px; margin-bottom: 20px;">TUTORIALS</div>
+        <button class="ui-box menu-btn tut-btn" data-tut="all">ALL</button>
+        <button class="ui-box menu-btn tut-btn" data-tut="movement">MOVEMENT</button>
+        <button class="ui-box menu-btn tut-btn" data-tut="sploot">SPLOOT BOMB</button>
+        <button class="ui-box menu-btn tut-btn" data-tut="control">CONTROLLED DRONE</button>
+        <button class="ui-box menu-btn tut-btn" data-tut="health">RESTORE HEALTH</button>
+        <button class="ui-box menu-btn" id="tut-back-btn">BACK</button>
+    </div>
+
+    <div id="codec-menu" class="menu-overlay" style="display: none; background: #0a110a; justify-content: space-between; padding: 0;">
+        <div class="codec-scanlines"></div>
+        <div style="width: 100%; height: 60%; display: flex; align-items: center; justify-content: center; z-index: 61;">
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <img id="codec-img" src="assets/agentBarklee.png" class="codec-portrait" />
+                <div id="codec-name" style="color: #679481; font-family: 'VT323', monospace; font-size: 55px; margin-top: 20px;">AGENT BARKLEE</div>
+                <div style="color: #679481; font-family: 'VT323', monospace; font-size: 35px; margin-top: 5px;">140.15 MHz</div>
+            </div>
+        </div>
+        <div style="width: 100%; height: 40%; box-sizing: border-box; background: rgba(10,20,10,0.95); border-top: 6px solid #679481; padding: 50px 80px; position: relative; z-index: 61;">
+            <div id="codec-text" style="color: #fff; font-family: 'VT323', monospace; font-size: 42px; line-height: 1.4;"></div>
+            <div style="color: #679481; font-family: 'VT323', monospace; font-size: 35px; position: absolute; bottom: 30px; right: 50px; animation: pulse-op 1s infinite; cursor: pointer;">▼ CLICK / TAP TO ADVANCE</div>
+        </div>
+    </div>
+
+    <div id="hud-score" class="ui-box score-display">SCORE: 0</div>
+    <div id="tutorial-progress" class="ui-box tutorial-score-display">0/3</div>
+    <div id="hud-health"></div>
+    <div id="hud-countdown" class="ui-box center-countdown">3</div>
+    <div id="hud-level-indicator" class="ui-box score-display" style="top: 30px; bottom: auto; left: 30px; right: auto; font-size: 30px; padding: 10px 20px; display: none;">LVL 1</div>
+    <div id="tutorial-msg-box" class="ui-box"></div>
+
+    <div id="hud-gameover" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 20; pointer-events: none; padding-bottom: 220px; box-sizing: border-box; background-color: rgba(141,70,69,0.5);">
+        <img src="assets/gameover.png" style="width: 650px; max-width: 90%; height: auto; margin-bottom: 10px; pointer-events: none;" />
+        <div class="ui-box" id="go-score" style="font-size: 40px; padding: 10px 30px; margin-bottom: 10px;">TOP SCORE: 0</div>
+        <div class="ui-box menu-btn" id="quick-restart-btn" style="font-size: 26px; padding: 10px 30px; margin-bottom: 10px; pointer-events: auto;">QUICK RESTART</div>
+        <div class="ui-box menu-btn" id="main-menu-btn" style="font-size: 26px; padding: 10px 30px; pointer-events: auto;">MAIN MENU</div>
+    </div>
+</div>
+
+<audio id="bgm" src="assets/turbo_zig_zag.mp3" loop></audio>
+
+<script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
